@@ -1,0 +1,356 @@
+========================================
+LECTURE SUMMARY
+===============
+
+CONCEPT: Generative AI and LLM
+Definition:
+
+* Generative AI creates new content such as text, images, and audio.
+* LLM is a type of generative AI focused on language and trained on large text data.
+
+Key Points:
+
+* LLM is a subset of generative AI
+* Focus on predicting and generating text
+
+Details:
+
+* Models learn patterns from large datasets
+* Output is based on probability, not true understanding
+
+Example:
+
+* Chatbots that write text or answer questions
+
+---
+
+CONCEPT: Google Queries vs LLM Questions
+Definition:
+
+* Google queries are short keyword searches
+* LLM questions are detailed instructions or requests
+
+Key Points:
+
+* LLM works better with context and clear intent
+* More detail leads to better answers
+
+Details:
+
+* Queries: short phrases like “git rebase vs merge”
+* LLM prompts: full explanations and tasks
+
+Example:
+
+* Instead of “recipe”, ask to modify an existing recipe
+
+---
+
+CONCEPT: Prompt Engineering Basics
+Definition:
+
+* Writing clear and structured instructions to get better AI output
+
+Key Points:
+
+* Be specific
+* Define tone, format, and length
+* Add constraints and context
+
+Details:
+
+* Include audience and purpose
+* Use precise wording instead of vague requests
+
+Example:
+
+* Ask for a 100-word pitch for investors instead of a general pitch
+
+---
+
+CONCEPT: Useful Prompting Strategies
+Definition:
+
+* Techniques to improve AI responses
+
+Key Points:
+
+* Act as an expert
+* Write clear instructions
+* Define tone and format
+* Control output length
+
+Details:
+
+* Specify role (e.g. lawyer, expert)
+* Define structure (lists, summaries)
+* Use delimiters to organize input
+
+Example:
+
+* Ask for summary + subtopics instead of simple summary
+
+---
+
+CONCEPT: Delimiters and Structure
+Definition:
+
+* Symbols or tags used to organize input for clarity
+
+Key Points:
+
+* Helps model understand structure
+* Reduces ambiguity
+
+Details:
+
+* Examples: hashtags, code blocks, XML tags
+* Separate context, tasks, and examples
+
+Example:
+
+* Use tags like <context> and <task>
+
+---
+
+CONCEPT: Step-by-Step Reasoning
+Definition:
+
+* Asking the model to break down problems into steps
+
+Key Points:
+
+* Improves accuracy
+* Reduces errors
+
+Details:
+
+* LLM generates tokens one at a time
+* More steps = more computation and better reasoning
+
+Example:
+
+* Solve math problems step-by-step instead of directly
+
+---
+
+CONCEPT: Autoregressive Model Behavior
+Definition:
+
+* LLM generates text one token at a time based on previous tokens
+
+Key Points:
+
+* No hidden reasoning outside text
+* Context window acts as memory
+
+Details:
+
+* Each token adds processing opportunity
+* Early mistakes affect later output
+
+Example:
+
+* Writing analysis first improves final answer
+
+---
+
+CONCEPT: One-shot and Few-shot Prompting
+Definition:
+
+* Teaching the model using examples in the prompt
+
+Key Points:
+
+* One-shot = one example
+* Few-shot = multiple examples
+
+Details:
+
+* Model learns patterns from examples
+* Improves consistency and accuracy
+
+Example:
+
+* Show sample outputs before asking for new one
+
+---
+
+CONCEPT: Task Decomposition
+Definition:
+
+* Breaking complex tasks into smaller parts
+
+Key Points:
+
+* Easier for model to solve
+* Improves planning and clarity
+
+Details:
+
+* Divide tasks
+* Assign roles and time estimates
+
+Example:
+
+* Split project into subtasks before estimating time
+
+---
+
+CONCEPT: Model Selection
+Definition:
+
+* Choosing the right AI model for a task
+
+Key Points:
+
+* Larger models = better reasoning but slower and costly
+* Smaller models = faster and cheaper
+
+Details:
+
+* Advanced models for complex tasks
+* Lightweight models for simple tasks
+
+Example:
+
+* Use powerful model for research, small model for chatbots
+
+---
+
+CONCEPT: Verification of Output
+Definition:
+
+* Checking AI responses for correctness and bias
+
+Key Points:
+
+* AI may sound correct but be wrong
+* Always verify sources
+
+Details:
+
+* Based on probability, not truth
+* Can produce confident errors
+
+Example:
+
+* Fact-check important information
+
+---
+
+CONCEPT: Hallucinations in AI
+Definition:
+
+* When AI generates incorrect or made-up information
+
+Key Points:
+
+* Caused by missing data or probability guesses
+* Increased by randomness settings
+
+Details:
+
+* Model fills gaps with likely patterns
+* Training and sampling affect output
+
+Example:
+
+* Invented facts when unsure
+
+---
+
+CONCEPT: Bias in AI
+Definition:
+
+* Systematic skew in AI outputs due to training data
+
+Key Points:
+
+* Reflects internet data biases
+* Reinforces common patterns
+
+Details:
+
+* Data imbalance causes bias
+* Human feedback introduces values
+
+Example:
+
+* Gender stereotypes in professions
+
+---
+
+CONCEPT: Structural Prompting Frameworks
+Definition:
+
+* Frameworks that organize prompts into clear parts
+
+Key Points:
+
+* Improve clarity and results
+* Reduce iteration time
+
+Details:
+
+* Force user to define context, task, and output
+* Useful for agents and systems
+
+Example:
+
+* Using structured sections instead of free text
+
+---
+
+CONCEPT: MEEPO Framework
+Definition:
+
+* A structured prompt model: Meta, Execution, Eyes & Ears, Persona, Output
+
+Key Points:
+
+* Covers context, task, audience, tone, and format
+
+Details:
+
+* Meta: background
+* Execution: task
+* Eyes & Ears: audience
+* Persona: tone/style
+* Output: format
+
+Example:
+
+* Writing a joke with defined audience and tone
+
+---
+
+CONCEPT: COSTAR Framework
+Definition:
+
+* Another structured prompting framework
+
+Key Points:
+
+* Includes context, objective, style, tone, audience, response
+
+Details:
+
+* Adds constraints, assumptions, and evaluation
+* Helps define scope and method
+
+Example:
+
+* Structured prompt for analysis or writing task
+
+---
+
+FINAL QUICK REVIEW
+
+* Better prompts = better results
+* Examples improve accuracy more than instructions
+* Always verify AI output
+
+========================================
+END
+===

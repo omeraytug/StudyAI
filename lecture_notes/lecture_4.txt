@@ -1,0 +1,342 @@
+========================================
+LECTURE SUMMARY
+===============
+
+CONCEPT: Tools in AI Systems
+Definition:
+
+* Tools are external functions that allow an LLM to perform actions
+
+Key Points:
+
+* LLM = reasoning, tools = execution
+* Connects AI to real-world systems
+
+Details:
+
+* Without tools, AI can only generate text
+* With tools, AI can fetch data, compute, and act
+
+Example:
+
+* AI calling an API to get weather data
+
+---
+
+CONCEPT: Importance of Tools
+Definition:
+
+* Why tools are essential for modern AI systems
+
+Key Points:
+
+* Enable real actions
+* Provide fresh data
+* Reduce hallucinations
+
+Details:
+
+* Access APIs and databases
+* Allow multiple operations
+* Improve accuracy of outputs
+
+Example:
+
+* Fetching live stock prices instead of guessing
+
+---
+
+CONCEPT: What is a Tool
+Definition:
+
+* A controlled function call executed by the system
+
+Key Points:
+
+* Defined by developers
+* Model decides when to use it
+
+Details:
+
+* Examples: web search, database queries, code execution
+* System controls execution, not the model
+
+Example:
+
+* Agent calls function to retrieve user data
+
+---
+
+CONCEPT: Retrieval-Augmented Generation (RAG)
+Definition:
+
+* A method to retrieve relevant documents and use them to generate answers
+
+Key Points:
+
+* Combines search with generation
+* Improves accuracy and relevance
+
+Details:
+
+* Retrieval: find relevant documents
+* Augmentation: combine documents with query
+* Generation: create answer based on both
+
+Example:
+
+* Support system retrieving documentation before answering
+
+---
+
+CONCEPT: Benefits of RAG
+Definition:
+
+* Advantages of using document retrieval with AI
+
+Key Points:
+
+* More accurate and updated information
+* Reduced hallucinations
+* Source traceability
+
+Details:
+
+* System performs search, not the model
+* Model uses retrieved data to answer
+
+Example:
+
+* Showing sources in answers
+
+---
+
+CONCEPT: When to Use RAG
+Definition:
+
+* Situations where RAG is effective
+
+Key Points:
+
+* Works best with structured or static data
+
+Details:
+
+* Suitable for policies, manuals, internal docs
+* No guarantee of perfect answers
+
+Example:
+
+* Company knowledge base assistant
+
+---
+
+CONCEPT: Embeddings and Vector Databases
+Definition:
+
+* Method to represent text as numerical vectors for similarity search
+
+Key Points:
+
+* Captures meaning, not exact words
+* Enables semantic search
+
+Details:
+
+* Documents converted into vectors
+* Similar vectors are close in space
+* Queries converted and matched
+* Often uses chunks of documents
+
+Example:
+
+* Finding relevant content even without exact keyword match
+
+---
+
+CONCEPT: Tool Calling Process
+Definition:
+
+* How an LLM interacts with tools
+
+Key Points:
+
+* Model suggests tool
+* System executes it
+
+Details:
+
+* System provides available tools
+* Model selects tool and parameters
+* System runs tool and returns output
+* Model continues reasoning
+
+Example:
+
+* Weather query handled via API call
+
+---
+
+CONCEPT: Structured Tool Calls
+Definition:
+
+* Using specific formats to request tool execution
+
+Key Points:
+
+* Uses structured outputs
+* Enables reliable automation
+
+Details:
+
+* Model generates tool call syntax
+* System parses and executes
+* Output returned to model
+
+Example:
+
+* JSON-like function call for API
+
+---
+
+CONCEPT: Tool Output as Untrusted Input
+Definition:
+
+* Treating tool results as potentially unsafe data
+
+Key Points:
+
+* Output may be incorrect or malicious
+
+Details:
+
+* Can include prompt injection
+* Must validate and filter results
+
+Example:
+
+* Malicious webpage affecting agent behavior
+
+---
+
+CONCEPT: Risks in Tool Usage
+Definition:
+
+* Common issues when using tools
+
+Key Points:
+
+* Prompt injection
+* Data leaks
+* Over-permission
+* Wrong actions
+
+Details:
+
+* Errors can lead to real-world consequences
+* More critical than chatbot mistakes
+
+Example:
+
+* Sending incorrect email or deleting data
+
+---
+
+CONCEPT: Secure Agent Design
+Definition:
+
+* Principles for safe tool usage in agents
+
+Key Points:
+
+* Minimize permissions
+* Validate data
+* Add human oversight
+
+Details:
+
+* Treat tool output as untrusted
+* Use allowlists for actions
+* Log all actions and decisions
+* Human-in-the-loop for risky tasks
+
+Example:
+
+* Approval required before financial transactions
+
+---
+
+CONCEPT: MCP (Model Context Protocol)
+Definition:
+
+* A standard way to connect LLMs with tools and data
+
+Key Points:
+
+* Separates model from integrations
+* Enables reusable tools
+
+Details:
+
+* MCP server exposes tools
+* MCP client connects agent to tools
+* Model decides when to use tools
+
+Example:
+
+* One tool used across multiple agents
+
+---
+
+CONCEPT: Benefits of MCP
+Definition:
+
+* Advantages of standardized tool integration
+
+Key Points:
+
+* Reusability
+* Clear architecture
+* Faster development
+
+Details:
+
+* Same tools used by multiple systems
+* Easier to scale and maintain
+
+Example:
+
+* Shared API tools across applications
+
+---
+
+CONCEPT: MCP Architecture
+Definition:
+
+* Structure of MCP-based systems
+
+Key Points:
+
+* Server, client, model roles
+
+Details:
+
+* Server: provides tools
+* Client: connects and calls tools
+* Model: selects tools
+
+Example:
+
+* Agent calling tools through MCP client
+
+---
+
+FINAL QUICK REVIEW
+
+* Tools enable AI to act, not just respond
+* RAG improves accuracy using external data
+* Security is critical when using tools
+
+========================================
+END
+===

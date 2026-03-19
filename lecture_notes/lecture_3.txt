@@ -1,0 +1,346 @@
+========================================
+LECTURE SUMMARY
+===============
+
+CONCEPT: AI Agents
+Definition:
+
+* An AI agent is an LLM that can take actions, not only generate text
+
+Key Points:
+
+* Works toward a goal
+* Makes decisions step-by-step
+* Uses tools to complete tasks
+
+Details:
+
+* Agent = LLM + system around it
+* Can plan, act, and evaluate results
+
+Example:
+
+* Agent that books meetings or solves tasks automatically
+
+---
+
+CONCEPT: Core Components of an Agent
+Definition:
+
+* Key parts required to build a functional AI agent
+
+Key Points:
+
+* Goal, planning, tools, memory, feedback
+
+Details:
+
+* Goal: defines what to achieve
+* Planning: breaks task into steps
+* Tools: external functions (API, database)
+* Memory: stores context and past actions
+* Feedback: evaluates and improves results
+
+Example:
+
+* Agent plans steps, uses tools, checks output, and adjusts
+
+---
+
+CONCEPT: Agent vs Chatbot
+Definition:
+
+* Difference between simple LLM interaction and agent systems
+
+Key Points:
+
+* Chatbot answers questions
+* Agent performs tasks and workflows
+
+Details:
+
+* Agents return results plus process/logs
+* Operate in multiple steps
+
+Example:
+
+* Chatbot explains how to book a flight
+* Agent books the flight
+
+---
+
+CONCEPT: Multimodal AI
+Definition:
+
+* AI that can process and generate multiple data types
+
+Key Points:
+
+* Includes text, audio, image, video
+* Works for both input and output
+
+Details:
+
+* Examples: speech-to-text, image-to-text, text-to-image
+* Enables new interfaces like voice and camera
+
+Example:
+
+* AI describing an image or generating audio from text
+
+---
+
+CONCEPT: Deterministic vs Non-Deterministic Agents
+Definition:
+
+* Two types of agent behavior
+
+Key Points:
+
+* Deterministic = fixed rules
+* Non-deterministic = flexible reasoning
+
+Details:
+
+* Deterministic:
+
+  * Same input → same output
+  * Used for simple, repetitive tasks
+* Non-deterministic:
+
+  * Can vary output
+  * Used for complex problems
+
+Example:
+
+* Deterministic: classify text
+* Non-deterministic: handle support emails dynamically
+
+---
+
+CONCEPT: Tools in AI Agents
+Definition:
+
+* External functions that allow agents to act in the real world
+
+Key Points:
+
+* Connect AI to real systems
+* Enable actions beyond text
+
+Details:
+
+* Examples: web search, APIs, databases, code execution
+* Model suggests tool, system executes it
+
+Example:
+
+* Agent retrieves live data from an API
+
+---
+
+CONCEPT: Tool Execution Flow
+Definition:
+
+* How agents use tools step-by-step
+
+Key Points:
+
+* Separation between model and system
+
+Details:
+
+* System provides available tools
+* Model selects tool and inputs
+* System executes tool
+* Model interprets result and continues
+
+Example:
+
+* Agent calls search → receives data → continues reasoning
+
+---
+
+CONCEPT: Benefits of Tools
+Definition:
+
+* Advantages of using tools with agents
+
+Key Points:
+
+* Access to real-time data
+* More accurate results
+* Enables automation
+
+Details:
+
+* Reduces guessing
+* Improves calculations
+* Enables full workflows
+
+Example:
+
+* Using code execution for exact math
+
+---
+
+CONCEPT: Risks of Tools
+Definition:
+
+* Challenges when using external tools
+
+Key Points:
+
+* Tool output can be wrong or unsafe
+* Security risks exist
+
+Details:
+
+* Prompt injection via tool output
+* Manipulated or incomplete data
+
+Example:
+
+* Malicious webpage influencing agent behavior
+
+---
+
+CONCEPT: Guardrails and Security
+Definition:
+
+* Safety mechanisms for controlling agent behavior
+
+Key Points:
+
+* Required when agents take actions
+* Prevent harmful outcomes
+
+Details:
+
+* Agents move from text to real actions
+* Need strict rules and monitoring
+
+Example:
+
+* Restricting actions like sending emails or deleting data
+
+---
+
+CONCEPT: Common Risks in Agents
+Definition:
+
+* Typical problems in agent systems
+
+Key Points:
+
+* Prompt injection
+* Data leaks
+* Over-permission
+* Wrong actions
+
+Details:
+
+* Agents may expose sensitive data
+* Can misuse tools if not controlled
+
+Example:
+
+* Agent leaking private information
+
+---
+
+CONCEPT: Practical Guardrails
+Definition:
+
+* Methods to reduce risks in agent systems
+
+Key Points:
+
+* Limit permissions
+* Verify tool outputs
+* Add human oversight
+
+Details:
+
+* Least privilege access
+* Allowlist tools
+* Logging and monitoring
+* Human-in-the-loop for risky actions
+
+Example:
+
+* Require approval before sending emails
+
+---
+
+CONCEPT: Top-p Parameter
+Definition:
+
+* Controls how many word options the model can choose from
+
+Key Points:
+
+* Controls diversity of output
+
+Details:
+
+* High value → more variety
+* Low value → more focused output
+
+Example:
+
+* Top-p = 0.9 allows selection from top probable words
+
+---
+
+CONCEPT: Temperature Parameter
+Definition:
+
+* Controls randomness in model output
+
+Key Points:
+
+* Low = stable and predictable
+* High = creative and varied
+
+Details:
+
+* Low temp for logic tasks
+* High temp for creative tasks
+
+Example:
+
+* Brainstorming vs classification
+
+---
+
+CONCEPT: Structured Prompting for Agents
+Definition:
+
+* Using structured instructions to control agent behavior
+
+Key Points:
+
+* Improves reliability
+* Reduces errors
+
+Details:
+
+* Include planning, tools, constraints
+* Define success criteria
+
+Example:
+
+* Prompt with clear steps and rules
+
+---
+
+FINAL QUICK REVIEW
+
+* Agents act, not just respond
+* Tools enable real-world actions but add risk
+* Guardrails are essential for safe systems
+
+========================================
+END
+===

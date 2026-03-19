@@ -1,0 +1,352 @@
+========================================
+LECTURE SUMMARY
+===============
+
+CONCEPT: Data, Information, Knowledge
+Definition:
+
+* Data = raw facts without context
+* Information = structured data with meaning
+* Knowledge = interpreted information used for decisions
+
+Key Points:
+
+* LLM transforms data into information
+* Knowledge requires human interpretation
+* Well-written text is not always true knowledge
+
+Details:
+
+* Data: numbers, logs, text fragments
+* Information: summaries, patterns, reports
+* Knowledge: insights and actions based on context
+
+Example:
+
+* Customer complaints → pattern → bug identified
+
+---
+
+CONCEPT: Role of LLM in Information Processing
+Definition:
+
+* LLMs analyze and structure large amounts of data
+
+Key Points:
+
+* Strong at summarizing and finding patterns
+* Weak at verifying truth
+
+Details:
+
+* Works based on probability
+* Does not check correctness automatically
+
+Example:
+
+* Summarizing reports but missing errors
+
+---
+
+CONCEPT: Prompt Chaining
+Definition:
+
+* Breaking a task into multiple sequential prompts
+
+Key Points:
+
+* Improves learning and understanding
+* Handles complex tasks step-by-step
+
+Details:
+
+* Steps: collect data → summarize → explain → personalize
+* Each step builds on previous output
+
+Example:
+
+* Study → summarize → simplify → apply to personal case
+
+---
+
+CONCEPT: Learning with AI
+Definition:
+
+* Using AI to support understanding and learning
+
+Key Points:
+
+* Do not learn everything at once
+* Use multiple summaries
+* Personalize learning
+
+Details:
+
+* Ask for explanations at different levels
+* Use different contexts for topics
+
+Example:
+
+* Ask AI to explain a study for beginners
+
+---
+
+CONCEPT: Sources for Information Retrieval
+Definition:
+
+* Platforms used to find reliable knowledge
+
+Key Points:
+
+* Use academic and trusted sources
+
+Details:
+
+* Google Scholar, PubMed, arXiv, SSRN
+* Research news platforms
+
+Example:
+
+* Search research papers for evidence
+
+---
+
+CONCEPT: Multimodal Input
+Definition:
+
+* Using different types of data as input
+
+Key Points:
+
+* Not limited to text
+* Includes images, audio, video
+
+Details:
+
+* AI can process transcripts, visuals, and speech
+
+Example:
+
+* Summarizing a YouTube video transcript
+
+---
+
+CONCEPT: Tools and External Functions
+Definition:
+
+* LLMs can use external systems to improve results
+
+Key Points:
+
+* Access to real-time data
+* Improves accuracy and automation
+
+Details:
+
+* Examples: APIs, databases, code execution
+* System executes tools, not the model
+
+Example:
+
+* Fetching web data before answering
+
+---
+
+CONCEPT: Benefits of Tools
+Definition:
+
+* Advantages of combining LLM with external tools
+
+Key Points:
+
+* More accurate results
+* Reduced hallucinations
+* Automation of tasks
+
+Details:
+
+* Provides factual data
+* Enables real-world actions
+
+Example:
+
+* Using code instead of guessing calculations
+
+---
+
+CONCEPT: Risks of Tools
+Definition:
+
+* Potential dangers when using external integrations
+
+Key Points:
+
+* Security risks
+* Incorrect interpretation
+
+Details:
+
+* Prompt injection attacks
+* Need for human control in critical actions
+
+Example:
+
+* Malicious input manipulating tool output
+
+---
+
+CONCEPT: Knowledge Transformation in Organizations
+Definition:
+
+* Converting large amounts of data into useful insights
+
+Key Points:
+
+* Reduce information overload
+* Keep relevant meaning
+
+Details:
+
+* Summarize emails, reports, logs
+* Identify patterns and decisions
+
+Example:
+
+* Turning meeting notes into action points
+
+---
+
+CONCEPT: AI Strengths and Limitations
+Definition:
+
+* Understanding what AI can and cannot do
+
+Key Points:
+
+* Good at summarizing and pattern recognition
+* Poor at judgment and truth verification
+
+Details:
+
+* Cannot understand real-world context fully
+* Needs instructions for prioritization
+
+Example:
+
+* AI suggests insights but cannot decide strategy alone
+
+---
+
+CONCEPT: AI as Filter, Not Truth
+Definition:
+
+* Using AI to reduce information, not replace thinking
+
+Key Points:
+
+* AI supports human decisions
+* Human verification is required
+
+Details:
+
+* Use AI before analysis
+* Combine with human judgment
+
+Example:
+
+* AI highlights key points, human decides action
+
+---
+
+CONCEPT: Risks and Ethics
+Definition:
+
+* Challenges when using AI in real-world situations
+
+Key Points:
+
+* Hallucinations and bias
+* Privacy and responsibility issues
+
+Details:
+
+* Overconfidence in AI output
+* Lack of transparency
+
+Example:
+
+* Incorrect summaries leading to wrong decisions
+
+---
+
+CONCEPT: Responsible AI Use
+Definition:
+
+* Guidelines for safe and effective AI usage
+
+Key Points:
+
+* Human-in-the-loop
+* Transparency and verification
+
+Details:
+
+* Use AI as support tool
+* Set clear rules and constraints
+
+Example:
+
+* Review AI outputs before decisions
+
+---
+
+CONCEPT: Cognitive Impact of AI
+Definition:
+
+* How AI affects human thinking and learning
+
+Key Points:
+
+* Can reduce critical thinking if misused
+* Can improve productivity if used correctly
+
+Details:
+
+* Risk: passive use (just answers)
+* Benefit: active use (learning support)
+
+Example:
+
+* Using AI to learn vs copying answers
+
+---
+
+CONCEPT: Prompt Chains for Workflows
+Definition:
+
+* Structured workflows using multiple prompts
+
+Key Points:
+
+* Can be reused across tasks
+* Helps automation and consistency
+
+Details:
+
+* Steps: expand → structure → prioritize → apply → personalize
+
+Example:
+
+* Study planning or business analysis workflow
+
+---
+
+FINAL QUICK REVIEW
+
+* AI turns data into information, not knowledge
+* Always verify AI output
+* Use AI as a tool, not a decision-maker
+
+========================================
+END
+===

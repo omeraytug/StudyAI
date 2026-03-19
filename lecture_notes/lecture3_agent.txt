@@ -1,0 +1,158 @@
+========================================
+LECTURE SUMMARY
+========================================
+
+CONCEPT: AI-agent
+Definition:
+- En AI-agent är en språkmodell som kan utföra handlingar och fatta beslut för att nå ett specifikt mål.
+
+Key Points:
+- Kan använda verktyg för att utföra uppgifter
+- Fattar beslut steg-för-steg
+- Kärnkomponenterna inkluderar mål, planering, verktyg, minne och feedback
+
+Details:
+- Mål definierar vad som ska uppnås
+- Planering bryter ner mål i delsteg
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Multimodalitet
+Definition:
+- Multimodal AI kan hantera och generera flera typer av data, inklusive text, ljud, bild och video.
+
+Key Points:
+- Kan fungera som både input och output
+- Viktigt för nya användargränssnitt
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Skillnad mellan agent och chatbot
+Definition:
+- En agent genomför arbetsflöden och återkommer med resultat, medan en chatbot bara svarar på frågor.
+
+Key Points:
+- Agenten loggar och dokumenterar resultat
+- Chatbotten är mer begränsad i funktionalitet
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Deterministisk och Icke-deterministisk agent
+Definition:
+- En deterministisk agent följer fördefinierade regler och ger samma beslut för samma input, medan en icke-deterministisk agent kan fatta olika beslut baserat på omständigheternas påverkan.
+
+Key Points:
+- Deterministisk agent är bra för repetitiva processer
+- Icke-deterministisk agent används för öppna problem och support-triage
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Verktyg
+Definition:
+- Verktyg är externa resurser eller funktioner som en agent kan använda för att utföra specifika uppgifter och interagera med verkligheten.
+
+Key Points:
+- Kopplar modellen till verkliga världen
+- Exempel inkluderar webbsök och API-anrop
+- Utökar agentens kapabiliteter
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Human-in-the-loop
+Definition:
+- En metod för att involvera mänsklig övervakning vid riskfyllda åtgärder som kan påverka data eller system.
+
+Key Points:
+- Används vid kritiska beslut som att skicka mejl eller radera data
+- Säkerställer att mänsklig insyn finns i automatiserade processer
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Prompt injection
+Definition:
+- Prompt injection är en risk där externa instruktioner kan påverka agentens beteende negativt.
+
+Key Points:
+- Kan leda till oönskade handlingar
+- Kräver skydd mot manipulation
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: RAG (Retrieval-Augmented Generation)
+Definition:
+- RAG är en metod för att söka efter dokument från en samling och kombinera det med generering av text.
+
+Key Points:
+- Används för att förbättra informationshämtning
+- Kan vara komplext att implementera
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+----------------------------------------
+
+CONCEPT: Temperatur och Top-p
+Definition:
+- Temperatur och Top-p är inställningar som påverkar hur modellen genererar svar.
+
+Key Points:
+- Låg temperatur ger stabila svar
+- Hög temperatur möjliggör mer kreativitet
+- Högt Top-p värde ger mer sannolika alternativ
+
+Details:
+- Ingen specifik mekanism eller formel tillhandahållen
+
+Example:
+- Ingen specifik exempel tillhandahållen
+
+========================================
+FINAL QUICK REVIEW
+- AI-agenter kan utföra handlingar och fatta beslut för att nå mål
+- Multimodalitet möjliggör hantering av olika datatyper
+- Human-in-the-loop säkerställer mänsklig övervakning vid riskfyllda åtgärder
+========================================
+END
+========================================

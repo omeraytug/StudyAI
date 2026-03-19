@@ -1,0 +1,175 @@
+========================================
+LECTURE SUMMARY
+========================================
+
+CONCEPT: Verktygsanvändning
+Definition:
+- Användning av verktyg är viktig för att en LLM kan agera och inte bara generera text. Verktyg kopplar modellen till verkligheten och möjliggör praktiska åtgärder.
+
+Key Points:
+- Utan verktyg kan modellen endast generera text.
+- Verktyg möjliggör handlingar utöver textgenerering.
+- Externa funktioner kan anropas för att hämta data.
+
+Details:
+- Verktyg kopplar modellen till aktuella data via API:er.
+- Viktigt för att utföra specifika uppgifter.
+
+Example:
+- Användning av API-anrop för att hämta information.
+
+----------------------------------------
+
+CONCEPT: RAG
+Definition:
+- RAG är en teknik som hämtar relevanta dokument baserat på en sökfråga och kombinerar dem med den ursprungliga frågan för att generera svar.
+
+Key Points:
+- Inkluderar retrieval, augmentation och generation.
+- Minskar hallucinationer och ger spårbarhet.
+
+Details:
+- Hämtar dokument baserat på sökfråga.
+- Kombinerar dokument med fråga för att skapa svar.
+
+Example:
+- Användning av RAG för att förbättra svarens relevans.
+
+----------------------------------------
+
+CONCEPT: Vektordatabaser
+Definition:
+- Vektordatabaser lagrar dokument som siffror (vektorer) för att möjliggöra sökning efter relevanta dokument baserat på betydelse snarare än exakta ord.
+
+Key Points:
+- Dokument omvandlas till vektorer som representerar betydelse.
+- Sökfrågor matchas med vektorer i databasen för att hitta relevanta resultat.
+
+Details:
+- Liknande dokument representeras nära varandra i vektorrummet.
+
+Example:
+- Sökning efter dokument som handlar om ett specifikt ämne baserat på betydelse.
+
+----------------------------------------
+
+CONCEPT: Hallucinationer
+Definition:
+- Hallucinationer är felaktiga eller påhittade svar som en LLM kan generera, vilket verktyg kan hjälpa till att minska.
+
+Key Points:
+- RAG kan minska hallucinationer men eliminerar dem inte helt.
+- Viktigt att vara medveten om riskerna vid användning av LLM.
+
+Details:
+- Ingen garanti för korrekthet i svar, även med verktyg.
+
+Example:
+- En LLM ger ett svar som inte stämmer överens med verkligheten.
+
+----------------------------------------
+
+CONCEPT: API-anrop
+Definition:
+- API-anrop är kontrollerade funktionsanrop som modellen kan använda för att hämta data eller utföra specifika uppgifter.
+
+Key Points:
+- Används för att få extern data.
+- Modellen föreslår verktyg men exekverar inte själv.
+
+Details:
+- Interagerar med externa system för att hämta information.
+
+Example:
+- Anrop till en väder-API för att få aktuella väderdata.
+
+----------------------------------------
+
+CONCEPT: Modellens flöde
+Definition:
+- Flödet beskriver hur modellen interagerar med systemet och verktygen för att bearbeta användarens frågor.
+
+Key Points:
+- Inkluderar val av verktyg och tolkning av resultat.
+- Består av flera steg från fråga till svar.
+
+Details:
+- Modellen väljer verktyg baserat på användarens behov.
+
+Example:
+- En användare ställer en fråga, modellen väljer verktyg och ger svar.
+
+----------------------------------------
+
+CONCEPT: Risker med verktygsanvändning
+Definition:
+- Potentiella problem som kan uppstå vid användning av verktyg i agenter, inklusive dataläckor och felaktiga åtgärder.
+
+Key Points:
+- Prompt injection kan leda till osäkra svar.
+- Felaktiga actions kan orsaka allvarliga konsekvenser.
+
+Details:
+- Dataläckor kan inkludera känslig information.
+
+Example:
+- En agent utför en åtgärd baserat på en manipulerad prompt.
+
+----------------------------------------
+
+CONCEPT: Grundprinciper för säkra agenter
+Definition:
+- Riktlinjer för att säkerställa att agenter fungerar på ett säkert och kontrollerat sätt.
+
+Key Points:
+- Minsta möjliga behörighet ska tillämpas.
+- Input/output ska valideras för att förhindra fel.
+
+Details:
+- Behandla verktygsutdata som osäker.
+
+Example:
+- Validering av användarinmatning innan åtgärder utförs.
+
+----------------------------------------
+
+CONCEPT: MCP (Model Context Protocol)
+Definition:
+- En standardiserad metod för hur agenter kommunicerar med verktyg genom en klient.
+
+Key Points:
+- MCP-servern tillhandahåller verktyg.
+- Modellen fungerar som "hjärnan" som väljer nödvändiga verktyg.
+
+Details:
+- Återanvändbara verktyg för flera agenter.
+
+Example:
+- En agent använder MCP för att anropa olika verktyg.
+
+----------------------------------------
+
+CONCEPT: Typiska användarfall
+Definition:
+- Typiska användarfall beskriver hur agenter kan kopplas till externa system och orkestrera verktyg.
+
+Key Points:
+- Koppla agenter till system som Gmail och Slack.
+- Orkestrera flera verktyg i samma arbetsflöde.
+
+Details:
+- Används för att effektivisera arbetsprocesser.
+
+Example:
+- En agent som hanterar e-post och kalender samtidigt.
+
+----------------------------------------
+
+FINAL QUICK REVIEW
+- Verktyg är avgörande för LLM:s funktionalitet.
+- RAG minskar hallucinationer och förbättrar svar.
+- Risker med verktygsanvändning måste hanteras noggrant.
+
+========================================
+END
+========================================
