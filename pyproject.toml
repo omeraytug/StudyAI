@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.26.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "StudyAI"
+version = "0.1.0"
+description = "RAG-baserad studiehjälp: tentafrågor från föreläsningar"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "langchain==1.2.10",
+    "langchain-openai>=0.3.0",
+    "langchain-core==1.2.11",
+    "langchain-community>=0.4.1",
+    "langchain-text-splitters>=0.3.0",
+    "langgraph==1.0.8",
+    "langchain-mcp-adapters",
+    "python-dotenv>=1.0.0",
+    "faiss-cpu>=1.7.4",
+    "pydantic>=2.0.0",
+    "pypdf>=5.0.0",
+    "fastmcp>=3.0",
+]
+
+[project.scripts]
+studyai-tenta = "studyai.tenta_rag:main"
+studyai-summarize = "studyai.summarize_agent:main"
+studyai-mcp = "studyai.mcp_server.server:main"
+studyai-mcp-agent = "studyai.mcp_agent_client:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["studyai"]
