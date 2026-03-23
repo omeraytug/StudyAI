@@ -41,7 +41,7 @@ from studyai.summary_prompts import (
     LECTURE_SUMMARY_SYSTEM,
 )
 from studyai.util.models import get_model
-from studyai.util.pretty_print import Colors, print_tool_summary, print_welcome
+from studyai.util.pretty_print import Colors, get_user_input, print_tool_summary, print_welcome
 
 # --- Token-/kostnadsgränser (justera via miljö om du vill) ---
 import os
@@ -96,20 +96,32 @@ def _filter_allowed_tools(tools: list[BaseTool], allowed_names: set[str]) -> lis
 
 async def _load_mcp_tools(
     *,
-    server_command: str,
+    mcp_url: str | None,
+    server_command: str | None,
     server_args: list[str],
     server_cwd: Path | None,
     allowed_tools: set[str],
 ) -> list[BaseTool]:
-    connections: dict[str, Any] = {
-        "study_mcp": {
-            "transport": "stdio",
-            "command": server_command,
-            "args": server_args,
+    url = (mcp_url or "").strip()
+    if url:
+        connections: dict[str, Any] = {
+            "study_mcp": {
+                "transport": "streamable_http",
+                "url": url,
+            }
         }
-    }
-    if server_cwd is not None:
-        connections["study_mcp"]["cwd"] = str(server_cwd)
+    else:
+        if not server_command:
+            raise ValueError("Ange --mcp-url eller --mcp-server-command.")
+        connections = {
+            "study_mcp": {
+                "transport": "stdio",
+                "command": server_command,
+                "args": server_args,
+            }
+        }
+        if server_cwd is not None:
+            connections["study_mcp"]["cwd"] = str(server_cwd)
 
     async with MultiServerMCPClient(connections=connections) as client:
         all_tools = await client.get_tools(server_name="study_mcp")
@@ -381,21 +393,31 @@ def main(argv: list[str] | None = None) -> None:
         help="Använd projektets lecture_notes/ + raw_lecture_notes/ om de finns.",
     )
     parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interaktivt läge: ange filer/mappar efter start (inga path-argument behövs).",
+    )
+    parser.add_argument(
+        "--mcp-url",
+        default=os.getenv("MCP_SERVER_URL", "").strip() or None,
+        help="URL till redan körande MCP-server (t.ex. http://127.0.0.1:8003/mcp).",
+    )
+    parser.add_argument(
         "--mcp-server-command",
         default=None,
-        help="Kommando för extern MCP-server (t.ex. uv eller python).",
+        help="(Avancerat) kommando för att starta MCP-server via stdio (t.ex. uv eller python).",
     )
     parser.add_argument(
         "--mcp-server-arg",
         action="append",
         default=[],
-        help="Argument till --mcp-server-command. Upprepa flaggan för flera argument.",
+        help="(Avancerat) argument till --mcp-server-command. Upprepa flaggan för flera argument.",
     )
     parser.add_argument(
         "--mcp-server-cwd",
         type=Path,
         default=None,
-        help="Arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
+        help="(Avancerat) arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
     )
     parser.add_argument(
         "--mcp-allow-tool",
@@ -429,34 +451,56 @@ def main(argv: list[str] | None = None) -> None:
                 roots.append(d)
 
     if not roots:
-        print(
-            f"{Colors.YELLOW}Ange minst en sökväg eller --lecture-notes. "
-            f"Exempel:{Colors.RESET}\n"
-            f"  uv run studyai-summarize --lecture-notes -o sammanfattning.txt\n"
-            f"  uv run studyai-summarize fil1.pdf fil2.txt notes/\n"
+        if not args.interactive:
+            print(
+                f"{Colors.DIM}Inga paths angivna. Startar interaktiv input...{Colors.RESET}"
+            )
+        raw = get_user_input(
+            "Ange filer/mappar att sammanfatta (separera med kommatecken), eller skriv 'lecture-notes'"
         )
+        if not raw:
+            print(f"{Colors.YELLOW}Ingen källa angiven. Avslutar.{Colors.RESET}")
+            raise SystemExit(1)
+        if raw.strip().casefold() in {"lecture-notes", "--lecture-notes"}:
+            r = project_root()
+            for name in ("lecture_notes", "raw_lecture_notes"):
+                d = r / name
+                if d.is_dir():
+                    roots.append(d)
+        else:
+            parts = [p.strip() for p in raw.split(",") if p.strip()]
+            roots.extend(Path(p) for p in parts)
+
+    if not roots:
+        print(f"{Colors.RED}Inga giltiga källor angivna.{Colors.RESET}")
         raise SystemExit(1)
 
     out = args.out
     if out and not out.is_absolute():
         out = project_root() / out
 
-    if not args.mcp_server_command and (
-        args.mcp_server_arg or args.mcp_server_cwd is not None or args.mcp_allow_tool or args.list_mcp_tools
-    ):
+    has_stdio_flags = bool(args.mcp_server_arg or args.mcp_server_cwd is not None)
+    has_any_mcp_intent = bool(
+        (args.mcp_url and str(args.mcp_url).strip())
+        or args.mcp_server_command
+        or has_stdio_flags
+        or args.mcp_allow_tool
+        or args.list_mcp_tools
+    )
+    if has_stdio_flags and not args.mcp_server_command:
         print(
-            f"{Colors.RED}MCP-flaggor angavs utan --mcp-server-command. "
-            f"Ange även kommando som startar servern.{Colors.RESET}"
+            f"{Colors.RED}MCP stdio-flaggor angavs utan --mcp-server-command.{Colors.RESET}"
         )
         raise SystemExit(1)
 
     mcp_tools: list[BaseTool] = []
     mcp_middleware: list[AgentMiddleware] = []
-    if args.mcp_server_command:
+    if has_any_mcp_intent:
         allow = {name.strip() for name in args.mcp_allow_tool if name.strip()}
         try:
             mcp_tools = asyncio.run(
                 _load_mcp_tools(
+                    mcp_url=args.mcp_url,
                     server_command=args.mcp_server_command,
                     server_args=args.mcp_server_arg,
                     server_cwd=args.mcp_server_cwd,
