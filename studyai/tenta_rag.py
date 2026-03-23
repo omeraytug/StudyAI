@@ -99,20 +99,32 @@ def _filter_allowed_tools(tools: list[BaseTool], allowed_names: set[str]) -> lis
 
 async def _load_mcp_tools(
     *,
-    server_command: str,
+    mcp_url: str | None,
+    server_command: str | None,
     server_args: list[str],
     server_cwd: Path | None,
     allowed_tools: set[str],
 ) -> list[BaseTool]:
-    connections: dict[str, Any] = {
-        "study_mcp": {
-            "transport": "stdio",
-            "command": server_command,
-            "args": server_args,
+    url = (mcp_url or "").strip()
+    if url:
+        connections: dict[str, Any] = {
+            "study_mcp": {
+                "transport": "streamable_http",
+                "url": url,
+            }
         }
-    }
-    if server_cwd is not None:
-        connections["study_mcp"]["cwd"] = str(server_cwd)
+    else:
+        if not server_command:
+            raise ValueError("Ange --mcp-url eller --mcp-server-command.")
+        connections = {
+            "study_mcp": {
+                "transport": "stdio",
+                "command": server_command,
+                "args": server_args,
+            }
+        }
+        if server_cwd is not None:
+            connections["study_mcp"]["cwd"] = str(server_cwd)
 
     async with MultiServerMCPClient(connections=connections) as client:
         all_tools = await client.get_tools(server_name="study_mcp")
@@ -546,21 +558,26 @@ def main(argv: list[str] | None = None) -> None:
         help=argparse.SUPPRESS,
     )
     parser.add_argument(
+        "--mcp-url",
+        default=os.getenv("MCP_SERVER_URL", "").strip() or None,
+        help="URL till redan körande MCP-server (t.ex. http://127.0.0.1:8003/mcp).",
+    )
+    parser.add_argument(
         "--mcp-server-command",
         default=None,
-        help="Kommando för extern MCP-server (t.ex. uv eller python).",
+        help="(Avancerat) kommando för att starta MCP-server via stdio (t.ex. uv eller python).",
     )
     parser.add_argument(
         "--mcp-server-arg",
         action="append",
         default=[],
-        help="Argument till --mcp-server-command. Upprepa flaggan för flera argument.",
+        help="(Avancerat) argument till --mcp-server-command. Upprepa flaggan för flera argument.",
     )
     parser.add_argument(
         "--mcp-server-cwd",
         type=Path,
         default=None,
-        help="Arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
+        help="(Avancerat) arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
     )
     parser.add_argument(
         "--mcp-allow-tool",
@@ -583,22 +600,28 @@ def main(argv: list[str] | None = None) -> None:
 
     os.chdir(root)
 
-    if not args.mcp_server_command and (
-        args.mcp_server_arg or args.mcp_server_cwd is not None or args.mcp_allow_tool or args.list_mcp_tools
-    ):
+    has_stdio_flags = bool(args.mcp_server_arg or args.mcp_server_cwd is not None)
+    has_any_mcp_intent = bool(
+        (args.mcp_url and str(args.mcp_url).strip())
+        or args.mcp_server_command
+        or has_stdio_flags
+        or args.mcp_allow_tool
+        or args.list_mcp_tools
+    )
+    if has_stdio_flags and not args.mcp_server_command:
         print(
-            f"{Colors.RED}MCP-flaggor angavs utan --mcp-server-command. "
-            f"Ange även kommando som startar servern.{Colors.RESET}"
+            f"{Colors.RED}MCP stdio-flaggor angavs utan --mcp-server-command.{Colors.RESET}"
         )
         raise SystemExit(1)
 
     mcp_tools: list[BaseTool] = []
     agent_middleware: list[AgentMiddleware] = []
-    if args.mcp_server_command:
+    if has_any_mcp_intent:
         allow = {name.strip() for name in args.mcp_allow_tool if name.strip()}
         try:
             mcp_tools = asyncio.run(
                 _load_mcp_tools(
+                    mcp_url=args.mcp_url,
                     server_command=args.mcp_server_command,
                     server_args=args.mcp_server_arg,
                     server_cwd=args.mcp_server_cwd,
