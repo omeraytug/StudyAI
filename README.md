@@ -67,45 +67,42 @@ Same as: `studyai-summarize`. Prompts and output format live in `studyai/summary
 Run existing agents via one entrypoint:
 
 ```bash
-# Tenta-RAG with MCP flags forwarded
+# Tenta-RAG without MCP (no extra flags)
+uv run studyai-agents --agent tenta -- 1
+
+# Tenta-RAG with running MCP server (simple mode: one MCP URL flag)
 uv run studyai-agents --agent tenta -- \
   1 \
-  --mcp-server-command uv \
-  --mcp-server-arg run --mcp-server-arg python --mcp-server-arg -m --mcp-server-arg your_mcp_server_module \
-  --mcp-server-cwd /absolute/path/to/mcp-project \
+  --mcp-url http://127.0.0.1:8003/mcp \
   --mcp-allow-tool tool_name_1
 
-# Summarize (no MCP needed/used)
+# Summarize without MCP
 uv run studyai-agents --agent summarize -- \
   --lecture-notes -o lecture_notes/out.txt
 
-# Summarize with MCP tools (optional)
+# Summarize with running MCP server
 uv run studyai-agents --agent summarize -- \
   --lecture-notes \
-  --mcp-server-command uv \
-  --mcp-server-arg run --mcp-server-arg python --mcp-server-arg -m --mcp-server-arg your_mcp_server_module \
-  --mcp-server-cwd /absolute/path/to/mcp-project \
+  --mcp-url http://127.0.0.1:8003/mcp \
   --mcp-allow-tool tool_name_1 \
   -o lecture_notes/out.txt
 ```
 
 Basic flow:
 - You can run `studyai-tenta` and `studyai-summarize` exactly as before (no MCP required).
-- If you want MCP, run your MCP server and then use `studyai-agents --agent tenta` or `studyai-agents --agent summarize`.
+- If you want MCP, run your MCP server and then use `--mcp-url` (or set env `MCP_SERVER_URL`).
 - The selected agent will run with MCP tools only when MCP flags are provided.
 - MCP server project: [https://github.com/omeraytug/mcp-project](https://github.com/omeraytug/mcp-project)
 
 ### MCP via existing Tenta-RAG agent
 
-`studyai.tenta_rag` can now connect to an external MCP server and include a filtered subset of MCP tools in the same existing agent run.
+`studyai.tenta_rag` can connect to an already running MCP server via URL and include a filtered subset of MCP tools in the same existing agent run.
 
 List MCP tools (after optional filtering):
 
 ```bash
 uv run python -m studyai.tenta_rag \
-  --mcp-server-command uv \
-  --mcp-server-arg run --mcp-server-arg python --mcp-server-arg -m --mcp-server-arg your_mcp_server_module \
-  --mcp-server-cwd /absolute/path/to/mcp-project \
+  --mcp-url http://127.0.0.1:8003/mcp \
   --mcp-allow-tool tool_name_1 \
   --mcp-allow-tool tool_name_2 \
   --list-mcp-tools
@@ -115,9 +112,7 @@ Run the normal Tenta-RAG flow with MCP tools enabled:
 
 ```bash
 uv run python -m studyai.tenta_rag 1 \
-  --mcp-server-command uv \
-  --mcp-server-arg run --mcp-server-arg python --mcp-server-arg -m --mcp-server-arg your_mcp_server_module \
-  --mcp-server-cwd /absolute/path/to/mcp-project \
+  --mcp-url http://127.0.0.1:8003/mcp \
   --mcp-allow-tool tool_name_1
 ```
 
@@ -125,9 +120,7 @@ Summarizer supports the same MCP flags:
 
 ```bash
 uv run python -m studyai.summarize_agent --lecture-notes \
-  --mcp-server-command uv \
-  --mcp-server-arg run --mcp-server-arg python --mcp-server-arg -m --mcp-server-arg your_mcp_server_module \
-  --mcp-server-cwd /absolute/path/to/mcp-project \
+  --mcp-url http://127.0.0.1:8003/mcp \
   --mcp-allow-tool tool_name_1 \
   -o lecture_notes/out.txt
 ```
