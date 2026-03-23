@@ -22,17 +22,21 @@ def _prep_sys_path_when_run_as_script() -> None:
 _prep_sys_path_when_run_as_script()
 
 import argparse
+import asyncio
 import hashlib
 import os
 from typing import Annotated, Any
 
 from langchain.agents import create_agent
+from langchain.agents.middleware import AgentMiddleware, wrap_tool_call
 from langchain.tools import tool
 from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.tools import BaseTool
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.errors import GraphRecursionError
 from pydantic import Field
 
@@ -40,7 +44,7 @@ from studyai.lecture_resolve import list_lecture_files, resolve_lecture_path
 from studyai.paths import exam_dir, lecture_notes_dir, project_root
 from studyai.util.embeddings import get_embeddings
 from studyai.util.models import get_model
-from studyai.util.pretty_print import Colors, get_user_input, print_welcome
+from studyai.util.pretty_print import Colors, get_user_input, print_tool_summary, print_welcome
 from studyai.util.streaming_utils import STREAM_MODES, handle_stream
 
 # LangChain agents compile with recursion_limit=10_000 by default — too high; allows runaway loops.
@@ -52,6 +56,68 @@ _MAX_CHUNK_CHARS = 950
 
 # Minsta storlek för att räkna som lyckad sparning (tom fil = misslyckat).
 _MIN_SAVED_CONTENT_CHARS = 120
+_MCP_TOOL_OUTPUT_MAX_CHARS = 1500
+
+
+def _extract_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                parts.append(str(block.get("text", block.get("content", ""))))
+            else:
+                parts.append(str(block))
+        return "\n".join(p for p in parts if p.strip())
+    return str(content)
+
+
+def _sanitize_tool_output(text: str, *, limit: int = _MCP_TOOL_OUTPUT_MAX_CHARS) -> str:
+    cleaned = text.replace("\r", "\n").strip()
+    if len(cleaned) <= limit:
+        return cleaned
+    return f"{cleaned[:limit].rstrip()} ... [truncated to {limit} chars]"
+
+
+@wrap_tool_call
+def sanitize_mcp_tool_output(request, handler):
+    """Normalisera MCP tool-output innan den går tillbaka till agenten."""
+    result = handler(request)
+    if isinstance(result, ToolMessage):
+        tool_name = request.tool.name if request.tool else request.tool_call.get("name", "mcp_tool")
+        original = _extract_text(result.content)
+        result.content = f"[MCP:{tool_name}] {_sanitize_tool_output(original)}"
+    return result
+
+
+def _filter_allowed_tools(tools: list[BaseTool], allowed_names: set[str]) -> list[BaseTool]:
+    if not allowed_names:
+        return tools
+    return [tool for tool in tools if tool.name in allowed_names]
+
+
+async def _load_mcp_tools(
+    *,
+    server_command: str,
+    server_args: list[str],
+    server_cwd: Path | None,
+    allowed_tools: set[str],
+) -> list[BaseTool]:
+    connections: dict[str, Any] = {
+        "study_mcp": {
+            "transport": "stdio",
+            "command": server_command,
+            "args": server_args,
+        }
+    }
+    if server_cwd is not None:
+        connections["study_mcp"]["cwd"] = str(server_cwd)
+
+    async with MultiServerMCPClient(connections=connections) as client:
+        all_tools = await client.get_tools(server_name="study_mcp")
+        selected = _filter_allowed_tools(all_tools, allowed_tools)
+        return selected
 
 
 def _message_text(msg: object) -> str:
@@ -250,6 +316,8 @@ def _run_tenta_once(
     num_questions: int | None = None,
     stream: bool = False,
     silent: bool = False,
+    extra_tools: list[BaseTool] | None = None,
+    middleware: list[AgentMiddleware] | None = None,
 ) -> dict[str, Any]:
     """
     Kör tenta-agenten en gång (ingen stdin). Används från CLI; `silent=True` är för programmatisk körning.
@@ -323,9 +391,21 @@ def _run_tenta_once(
     if num_questions is not None:
         n_hint = f" Användaren vill ha ungefär {num_questions} frågor."
 
+    agent_tools: list = [search_documents, save_tentafragor]
+    if extra_tools:
+        agent_tools.extend(extra_tools)
+
+    mcp_instruction = ""
+    if extra_tools:
+        mcp_instruction = (
+            "\n\nDu har även tillgång till externa MCP-verktyg. "
+            "Använd dem bara när de hjälper uppgiften och följ deras argumentkontrakt exakt."
+        )
+
     agent = create_agent(
         model=model,
-        tools=[search_documents, save_tentafragor],
+        tools=agent_tools,
+        middleware=middleware or [],
         system_prompt=(
             "Du är en examinator som skapar **nya** **tentafrågor** på **svenska** utifrån kursmaterial.\n"
             f"Aktuell föreläsning (fil): **{lecture_path.name}**.\n\n"
@@ -344,7 +424,7 @@ def _run_tenta_once(
             "**Inga svar eller facit** under respektive fråga.\n"
             "- Sedan en **tydlig avdelare** (t.ex. horisontell linje `---` eller rubrik `## Facit`).\n"
             "- Därefter **facit/svar**: rubrik `## Facit` och samma numrering (1., 2., …) så att svar 1 hör till fråga 1.\n\n"
-            f"Standardfilnamn: `{default_save_name}`.{n_hint}"
+            f"Standardfilnamn: `{default_save_name}`.{n_hint}{mcp_instruction}"
         ),
     )
 
@@ -402,6 +482,8 @@ def run_interactive(
     num_questions: int | None = None,
     *,
     stream: bool = False,
+    extra_tools: list[BaseTool] | None = None,
+    middleware: list[AgentMiddleware] | None = None,
 ) -> None:
     user_ask = get_user_input(
         "Vad vill du att jag gör? (t.ex. 'Skapa 5 tentafrågor med facit', 'Bara diskussionsfrågor')"
@@ -414,6 +496,8 @@ def run_interactive(
         num_questions=num_questions,
         stream=stream,
         silent=False,
+        extra_tools=extra_tools,
+        middleware=middleware,
     )
 
 
@@ -461,6 +545,34 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help=argparse.SUPPRESS,
     )
+    parser.add_argument(
+        "--mcp-server-command",
+        default=None,
+        help="Kommando för extern MCP-server (t.ex. uv eller python).",
+    )
+    parser.add_argument(
+        "--mcp-server-arg",
+        action="append",
+        default=[],
+        help="Argument till --mcp-server-command. Upprepa flaggan för flera argument.",
+    )
+    parser.add_argument(
+        "--mcp-server-cwd",
+        type=Path,
+        default=None,
+        help="Arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
+    )
+    parser.add_argument(
+        "--mcp-allow-tool",
+        action="append",
+        default=[],
+        help="MCP-verktyg som agenten får använda. Upprepa för flera.",
+    )
+    parser.add_argument(
+        "--list-mcp-tools",
+        action="store_true",
+        help="Lista tillgängliga MCP-verktyg (efter filtrering) och avsluta.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -470,6 +582,48 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(1) from e
 
     os.chdir(root)
+
+    if not args.mcp_server_command and (
+        args.mcp_server_arg or args.mcp_server_cwd is not None or args.mcp_allow_tool or args.list_mcp_tools
+    ):
+        print(
+            f"{Colors.RED}MCP-flaggor angavs utan --mcp-server-command. "
+            f"Ange även kommando som startar servern.{Colors.RESET}"
+        )
+        raise SystemExit(1)
+
+    mcp_tools: list[BaseTool] = []
+    agent_middleware: list[AgentMiddleware] = []
+    if args.mcp_server_command:
+        allow = {name.strip() for name in args.mcp_allow_tool if name.strip()}
+        try:
+            mcp_tools = asyncio.run(
+                _load_mcp_tools(
+                    server_command=args.mcp_server_command,
+                    server_args=args.mcp_server_arg,
+                    server_cwd=args.mcp_server_cwd,
+                    allowed_tools=allow,
+                )
+            )
+        except Exception as e:
+            print(f"{Colors.RED}Kunde inte ladda MCP-verktyg: {e}{Colors.RESET}")
+            raise SystemExit(1) from e
+
+        if not mcp_tools:
+            print(
+                f"{Colors.YELLOW}Inga MCP-verktyg tillgängliga efter filtrering. "
+                f"Kontrollera --mcp-allow-tool.{Colors.RESET}"
+            )
+            if args.list_mcp_tools:
+                return
+        else:
+            print_tool_summary(mcp_tools)
+            agent_middleware = [sanitize_mcp_tool_output]
+            names = ", ".join(t.name for t in mcp_tools)
+            print(f"{Colors.DIM}MCP-verktyg aktiva i agenten: {names}{Colors.RESET}\n")
+
+        if args.list_mcp_tools:
+            return
 
     if args.list_lectures:
         _print_available_lectures()
@@ -501,6 +655,8 @@ def main(argv: list[str] | None = None) -> None:
         path,
         num_questions=args.num_questions,
         stream=use_stream,
+        extra_tools=mcp_tools,
+        middleware=agent_middleware,
     )
 
 
