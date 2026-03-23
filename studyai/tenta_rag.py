@@ -252,7 +252,7 @@ def _run_tenta_once(
     silent: bool = False,
 ) -> dict[str, Any]:
     """
-    Kör tenta-agenten en gång (ingen stdin). Används från CLI (silent=False) och MCP (silent=True).
+    Kör tenta-agenten en gång (ingen stdin). Används från CLI; `silent=True` är för programmatisk körning.
     """
     root = project_root()
     exam = exam_dir()
