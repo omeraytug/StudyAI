@@ -12,7 +12,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 from typing import List
 
 from studyai.util.pretty_print import Colors, print_welcome
@@ -38,7 +37,7 @@ def main(argv: list[str] | None = None) -> None:
 
     print_welcome(
         title="StudyAI — Agent Wire",
-        description="Kör en av de befintliga agenterna. MCP-flaggor förs vidare till Tenta-RAG.",
+        description="Kör en av de befintliga agenterna. MCP-flaggor förs vidare till vald agent.",
         version="0.1.0",
     )
 
@@ -57,8 +56,6 @@ def main(argv: list[str] | None = None) -> None:
     if args.agent == "summarize":
         from studyai.summarize_agent import main as summarize_main
 
-        # summarize-agenten har ingen MCP-integration. Eventuella MCP-flaggor
-        # i forwarded args ignoreras av dess parser.
         summarize_main(forwarded or None)
         return
 
