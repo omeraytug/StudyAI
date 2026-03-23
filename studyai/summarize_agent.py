@@ -22,11 +22,17 @@ def _prep_sys_path_when_run_as_script() -> None:
 _prep_sys_path_when_run_as_script()
 
 import argparse
+import asyncio
 import unicodedata
+from typing import Any
 
+from langchain.agents import create_agent
+from langchain.agents.middleware import AgentMiddleware, wrap_tool_call
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.tools import BaseTool
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from studyai.paths import project_root
 from studyai.summary_prompts import (
@@ -35,7 +41,7 @@ from studyai.summary_prompts import (
     LECTURE_SUMMARY_SYSTEM,
 )
 from studyai.util.models import get_model
-from studyai.util.pretty_print import Colors, print_welcome
+from studyai.util.pretty_print import Colors, print_tool_summary, print_welcome
 
 # --- Token-/kostnadsgränser (justera via miljö om du vill) ---
 import os
@@ -47,6 +53,67 @@ MAX_CHUNKS_PER_FILE = int(os.getenv("STUDYAI_SUMMARY_MAX_CHUNKS", "8"))
 MAX_OUT_CHUNK = int(os.getenv("STUDYAI_SUMMARY_MAX_TOKENS_CHUNK", "420"))
 MAX_OUT_FILE = int(os.getenv("STUDYAI_SUMMARY_MAX_TOKENS_FILE", "900"))
 MAX_OUT_FINAL = int(os.getenv("STUDYAI_SUMMARY_MAX_TOKENS_FINAL", "4096"))
+MCP_TOOL_OUTPUT_MAX_CHARS = 1500
+
+
+def _extract_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                parts.append(str(block.get("text", block.get("content", ""))))
+            else:
+                parts.append(str(block))
+        return "\n".join(p for p in parts if p.strip())
+    return str(content)
+
+
+def _sanitize_tool_output(text: str, *, limit: int = MCP_TOOL_OUTPUT_MAX_CHARS) -> str:
+    cleaned = text.replace("\r", "\n").strip()
+    if len(cleaned) <= limit:
+        return cleaned
+    return f"{cleaned[:limit].rstrip()} ... [truncated to {limit} chars]"
+
+
+@wrap_tool_call
+def sanitize_mcp_tool_output(request, handler):
+    """Normalisera/trunkera MCP tool-output innan den går tillbaka till modellen."""
+    result = handler(request)
+    if isinstance(result, ToolMessage):
+        tool_name = request.tool.name if request.tool else request.tool_call.get("name", "mcp_tool")
+        original = _extract_text(result.content)
+        result.content = f"[MCP:{tool_name}] {_sanitize_tool_output(original)}"
+    return result
+
+
+def _filter_allowed_tools(tools: list[BaseTool], allowed_names: set[str]) -> list[BaseTool]:
+    if not allowed_names:
+        return tools
+    return [tool for tool in tools if tool.name in allowed_names]
+
+
+async def _load_mcp_tools(
+    *,
+    server_command: str,
+    server_args: list[str],
+    server_cwd: Path | None,
+    allowed_tools: set[str],
+) -> list[BaseTool]:
+    connections: dict[str, Any] = {
+        "study_mcp": {
+            "transport": "stdio",
+            "command": server_command,
+            "args": server_args,
+        }
+    }
+    if server_cwd is not None:
+        connections["study_mcp"]["cwd"] = str(server_cwd)
+
+    async with MultiServerMCPClient(connections=connections) as client:
+        all_tools = await client.get_tools(server_name="study_mcp")
+        return _filter_allowed_tools(all_tools, allowed_tools)
 
 
 def _norm_basename(name: str) -> str:
@@ -159,6 +226,8 @@ def summarize_agent_run(
     paths: list[Path],
     *,
     out_path: Path | None = None,
+    mcp_tools: list[BaseTool] | None = None,
+    mcp_middleware: list[AgentMiddleware] | None = None,
 ) -> str:
     files, path_notes = _expand_paths(paths)
     if not files:
@@ -250,19 +319,31 @@ def summarize_agent_run(
         raise SystemExit("Kunde inte skapa några sammanfattningar.")
 
     bundle = "\n\n".join(per_file_blocks)
-    final_resp = llm_final.invoke(
-        [
-            sys_final,
-            HumanMessage(
-                content=(
-                    "Produce the complete LECTURE SUMMARY from these pipeline notes. "
-                    "Use the same language as the notes for all free text (e.g. Swedish).\n\n"
-                    f"{bundle}"
-                ),
-            ),
-        ],
+    final_prompt = (
+        "Produce the complete LECTURE SUMMARY from these pipeline notes. "
+        "Use the same language as the notes for all free text (e.g. Swedish).\n\n"
+        f"{bundle}"
     )
-    final = _response_text(final_resp)
+
+    if mcp_tools:
+        final_agent = create_agent(
+            model=llm_final,
+            tools=mcp_tools,
+            middleware=mcp_middleware or [],
+            system_prompt=(
+                f"{LECTURE_SUMMARY_SYSTEM}\n\n"
+                "Du får använda MCP-verktyg om de hjälper dig skapa bättre sammanfattning. "
+                "Om verktyg används, följ deras argument och output strikt."
+            ),
+        )
+        result = final_agent.invoke({"messages": [{"role": "user", "content": final_prompt}]})
+        messages = result.get("messages", []) or []
+        if not messages:
+            raise SystemExit("MCP-agenten returnerade inget slutresultat.")
+        final = _extract_text(getattr(messages[-1], "content", "")).strip()
+    else:
+        final_resp = llm_final.invoke([sys_final, HumanMessage(content=final_prompt)])
+        final = _response_text(final_resp)
 
     # Endast slutdokumentet (ren .txt, inga extra rubriker från oss)
     full_output = final if final.endswith("\n") else final + "\n"
@@ -299,6 +380,34 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Använd projektets lecture_notes/ + raw_lecture_notes/ om de finns.",
     )
+    parser.add_argument(
+        "--mcp-server-command",
+        default=None,
+        help="Kommando för extern MCP-server (t.ex. uv eller python).",
+    )
+    parser.add_argument(
+        "--mcp-server-arg",
+        action="append",
+        default=[],
+        help="Argument till --mcp-server-command. Upprepa flaggan för flera argument.",
+    )
+    parser.add_argument(
+        "--mcp-server-cwd",
+        type=Path,
+        default=None,
+        help="Arbetskatalog där MCP-servern körs (t.ex. /home/.../mcp-project).",
+    )
+    parser.add_argument(
+        "--mcp-allow-tool",
+        action="append",
+        default=[],
+        help="MCP-verktyg som summarize-agenten får använda. Upprepa för flera.",
+    )
+    parser.add_argument(
+        "--list-mcp-tools",
+        action="store_true",
+        help="Lista tillgängliga MCP-verktyg (efter filtrering) och avsluta.",
+    )
     args = parser.parse_args(argv)
 
     print_welcome(
@@ -332,7 +441,54 @@ def main(argv: list[str] | None = None) -> None:
     if out and not out.is_absolute():
         out = project_root() / out
 
-    text = summarize_agent_run(roots, out_path=out)
+    if not args.mcp_server_command and (
+        args.mcp_server_arg or args.mcp_server_cwd is not None or args.mcp_allow_tool or args.list_mcp_tools
+    ):
+        print(
+            f"{Colors.RED}MCP-flaggor angavs utan --mcp-server-command. "
+            f"Ange även kommando som startar servern.{Colors.RESET}"
+        )
+        raise SystemExit(1)
+
+    mcp_tools: list[BaseTool] = []
+    mcp_middleware: list[AgentMiddleware] = []
+    if args.mcp_server_command:
+        allow = {name.strip() for name in args.mcp_allow_tool if name.strip()}
+        try:
+            mcp_tools = asyncio.run(
+                _load_mcp_tools(
+                    server_command=args.mcp_server_command,
+                    server_args=args.mcp_server_arg,
+                    server_cwd=args.mcp_server_cwd,
+                    allowed_tools=allow,
+                )
+            )
+        except Exception as e:
+            print(f"{Colors.RED}Kunde inte ladda MCP-verktyg: {e}{Colors.RESET}")
+            raise SystemExit(1) from e
+
+        if not mcp_tools:
+            print(
+                f"{Colors.YELLOW}Inga MCP-verktyg tillgängliga efter filtrering. "
+                f"Kontrollera --mcp-allow-tool.{Colors.RESET}"
+            )
+            if args.list_mcp_tools:
+                return
+        else:
+            print_tool_summary(mcp_tools)
+            names = ", ".join(t.name for t in mcp_tools)
+            print(f"{Colors.DIM}MCP-verktyg aktiva i summarize-agenten: {names}{Colors.RESET}\n")
+            mcp_middleware = [sanitize_mcp_tool_output]
+
+        if args.list_mcp_tools:
+            return
+
+    text = summarize_agent_run(
+        roots,
+        out_path=out,
+        mcp_tools=mcp_tools,
+        mcp_middleware=mcp_middleware,
+    )
     if not args.out:
         print(f"\n{Colors.BOLD}--- Utdrag (sista delen om långt) ---{Colors.RESET}\n")
         if "FINAL QUICK REVIEW" in text:
